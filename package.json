@@ -1,0 +1,32 @@
+{
+  "name": "rx-graphlib-graph",
+  "version": "0.1.0",
+  "description": "",
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/.git"
+  },
+  "homepage": "https://github.com/",
+  "bugs": {
+    "url": "https://github.com//issues"
+  },
+  "main": "build/index.js",
+  "scripts": {
+    "build": "gulp build",
+    "watch:build": "gulp watch:build"
+  },
+  "devDependencies": {
+    "gulp": "3.9.0",
+    "gulp-babel": "6.1.1",
+    "gulp-util": "3.0.7",
+    "babel-preset-es2015": "6.3.13"
+  },
+  "peerDependencies": {
+  },
+  "dependencies": {
+    "graphlib": "2.1.0"
+  }
+}
