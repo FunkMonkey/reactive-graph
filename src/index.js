@@ -1,57 +1,149 @@
+// TYPE DEFINITIONS
+
+/**
+ * A user-defined operator configuration. Can basically be anything.
+ *
+ * @typedef {*}   OperatorConfig
+ */
+
+/**
+ * A graph node information for operators.
+ *
+ * @typedef {Object} NodeInfo
+ * @property {string}          id
+ * @property {OperatorConfig}  operatorConfig
+ * @property {string[]}        sources - ID's of sources
+*/
+
+/**
+ * Callback signature for a function that creates an `Rx.Observable` from an
+ * user-defined observable configuration (taken from a graph node's value) and
+ * a set of ingoing `Rx.Observable`'s
+ *
+ * @callback insertOperatorCallback
+ * @param {OperatorConfig}    operatorConfig
+ * @param {Rx.Observable[]}   sources
+ * @return {Rx.Observable}
+ */
+
+/**
+ * Information for chaining an operator using `Rx.Observable.let`.
+ *
+ * @typedef {Object} LetObservableInfo
+ * @property {Function}   operator   Function to be passed to `let`
+ * @property {Object}     context    [Optional] Calling context of the operator function
+ * @property {*[]}        args       Additional arguments passed to the operator function
+ */
+
+/**
+ * Callback signature for a function that creates information for chaining an
+ * operator using `Rx.Observable.let`.
+ *
+ * @callback getLetOperatorCallback
+ * @param {OperatorConfig}    operatorConfig
+ * @param {Rx.Observable[]}   sources         All sources, except for first one,
+ *                                            which will be used as `source.let`
+ * @return {LetObservableInfo}
+ */
+
 import graphlib from 'graphlib';
 
 // TODO: parseInt? NaN to MAX_VALUE?
 // TODO: accept Object with 'index' property
 const getEdgeIndex = edge => (typeof( edge ) === 'number') ? edge : Number.MAX_VALUE;
 
+/**
+ * Returns the nodes as a topsorted array of `NodeInfo`'s. Source nodes are sorted
+ * by the ingoing edge's value.
+ *
+ * @param  {graphlib.Graph}   graph
+ * @return {NodeInfo[]}
+ */
 function getTopsortedNodes( graph ) {
   const topsortedNodeIDs = graphlib.alg.topsort( graph );
 
-  return topsortedNodeIDs.forEach( id => {
-    const value = graph.node( id );
+  return topsortedNodeIDs.map( id => {
+    const operatorConfig = graph.node( id );
     const inEdges = graph.inEdges( id );
 
-    const predecessors = inEdges.map( inEdge => ({
+    const sources = inEdges.map( inEdge => ({
         index: getEdgeIndex( graph.edge( inEdge ) ),
         id: inEdge.v
       }) )
-      .sort( ( preA, preB ) => preA.index - preB.index );
+      .sort( ( preA, preB ) => preA.index - preB.index )
+      .map( pre => pre.id );
 
     return {
       id,
-      value,
-      predecessors
+      operatorConfig,
+      sources
     };
   } );
 }
 
-function connectRxOperators( topsortedNodes, insertOperator ) {
+/**
+ * Connects the graph's nodes by iterating an array of topsorted node infos
+ * and calling `insertOperator` for every node.
+ *
+ * @param  {NodeInfo[]}                      topsortedNodes
+ * @param  {insertOperatorCallback}          insertOperator
+ * @return {Object.<string, Rx.Observable>}
+ */
+function connectOperators( topsortedNodes, insertOperator ) {
   return topsortedNodes.reduce( ( observables, node ) => {
-    const sources = node.predecessors.map( pre => observables[ pre.id ] );
-    observables[ node.id ] = insertOperator( node.value, sources );
+    const sources = node.sources.map( preID => observables[ preID ] );
+    observables[ node.id ] = insertOperator( node.operatorConfig, sources );
     return observables;
   }, {} );
 }
 
-function create ( graph, insertOperator ) {
-  return connectRxOperators( getTopsortedNodes( graph ), insertOperator );
+/**
+ * Runs a graph by connecting the graph's nodes in a topsorted fashion, calling
+ * `insertOperator` for every node. Source nodes are sorted by the ingoing
+ * edge's value.
+ *
+ * This function is merely a shortcut for:
+ * `connectOperators( getTopsortedNodes( graph ), insertOperator )`
+ *
+ * @param  {graphlib.Graph}           graph
+ * @param  {insertOperatorCallback}   insertOperator
+ * @return {Object.<string, Rx.Observable>}
+ */
+function run ( graph, insertOperator ) {
+  return connectOperators( getTopsortedNodes( graph ), insertOperator );
 }
 
-function insertUsingLet ( getOperatorAndArguments, opConfig, sources ) {
+
+/**
+ * Utility function that chains operators by using `Rx.Observable.let`.
+ *
+ * Takes a callback function for providing the function that will be passed to
+ * `let` (`operator` property), the calling context and additional arguments
+ * (`args`).
+ * If no sources are provided, it will be called directly with `null` as the
+ * first argument. Otherwise the first element of `sources` will be considered
+ * the source for `let`, while the others are passed to `getOperatorContextAndArgs`.
+ *
+ * @param  {getLetOperatorCallback}  getOperatorContextAndArgs
+ * @param  {OperatorConfig}          opConfig
+ * @param  {Rx.Observable[0]}        sources
+ * @return {Rx.Observable}
+ */
+function insertUsingLet ( getOperatorContextAndArgs, opConfig, sources ) {
   if( sources.length === 0 ) {
-    const opAndArgs = getOperatorAndArguments( opConfig, [] );
-    return opAndArgs.operator.apply( null, null, opAndArgs.args );
+    const opAndArgs = getOperatorContextAndArgs( opConfig, [] );
+    return opAndArgs.operator.call( opAndArgs.context || null, null, ...opAndArgs.args );
   } else {
     const source = sources[0];
     const extraSources = sources.slice( 1 );
-    const opAndArgs = getOperatorAndArguments( opConfig, extraSources );
-    return source.let( o => opAndArgs.operator.apply( null, o, ...opAndArgs.args ) );
+    const opAndArgs = getOperatorContextAndArgs( opConfig, extraSources );
+    return source.let( o => opAndArgs.operator.call( opAndArgs.context || null, o, ...opAndArgs.args ) );
   }
 }
 
 export default {
   getTopsortedNodes,
-  connectRxOperators,
-  create,
+  connectOperators,
+  run,
   insertUsingLet
 }
