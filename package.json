@@ -1,17 +1,19 @@
 {
-  "name": "rx-graphlib-network",
-  "version": "0.1.0",
+  "name": "reactive-graph",
+  "version": "0.2.0",
   "description": "",
-  "keywords": [],
-  "author": "",
+  "keywords": [ "reactive", "frp", "Rx", "RxJS", "bacon", "bacon.js",
+                "Observable", "graph", "graphlib", "kefir", "kefir.js",
+                "stream", "streams" ],
+  "author": "AndSelm <and.selm@gmail.com>",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git://github.com/.git"
+    "url": "git@github.com:FunkMonkey/reactive-graph.git"
   },
-  "homepage": "https://github.com/",
+  "homepage": "https://github.com/FunkMonkey/reactive-graph",
   "bugs": {
-    "url": "https://github.com//issues"
+    "url": "https://github.com/FunkMonkey/reactive-graph/issues"
   },
   "main": "build/index.js",
   "scripts": {
@@ -23,8 +25,6 @@
     "gulp-babel": "6.1.1",
     "gulp-util": "3.0.7",
     "babel-preset-es2015": "6.3.13"
-  },
-  "peerDependencies": {
   },
   "dependencies": {
     "graphlib": "2.1.0"
