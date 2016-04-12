@@ -1,7 +1,7 @@
 {
   "name": "reactive-graph",
-  "version": "0.2.0",
-  "description": "",
+  "version": "0.2.1",
+  "description": "Convert Graphlib graphs to observable networks",
   "keywords": [ "reactive", "frp", "Rx", "RxJS", "bacon", "bacon.js",
                 "Observable", "graph", "graphlib", "kefir", "kefir.js",
                 "stream", "streams" ],
