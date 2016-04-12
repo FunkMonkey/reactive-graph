@@ -16,14 +16,15 @@
 */
 
 /**
- * Callback signature for a function that creates an `Rx.Observable` from an
+ * Callback signature for a function that creates a `Observable` from an
  * user-defined observable configuration (taken from a graph node's value) and
- * a set of ingoing `Rx.Observable`'s
+ * a set of ingoing `Observable`'s
  *
  * @callback insertOperatorCallback
+ * @param {string}            id
  * @param {OperatorConfig}    operatorConfig
- * @param {Rx.Observable[]}   sources
- * @return {Rx.Observable}
+ * @param {Observable[]}      sources
+ * @return {Observable}
  */
 
 /**
@@ -41,7 +42,7 @@
  *
  * @callback getLetOperatorCallback
  * @param {OperatorConfig}    operatorConfig
- * @param {Rx.Observable[]}   sources         All sources, except for first one,
+ * @param {Observable[]}      sources         All sources, except for first one,
  *                                            which will be used as `source.let`
  * @return {LetObservableInfo}
  */
@@ -83,16 +84,17 @@ function getTopsortedNodes( graph ) {
 
 /**
  * Connects the graph's nodes by iterating an array of topsorted node infos
- * and calling `insertOperator` for every node.
+ * and calling `insertOperator` for every node. Returns a dictionary of the
+ * created observables.
  *
  * @param  {NodeInfo[]}                      topsortedNodes
  * @param  {insertOperatorCallback}          insertOperator
- * @return {Object.<string, Rx.Observable>}
+ * @return {Object.<string, Observable>}
  */
 function connectOperators( topsortedNodes, insertOperator ) {
   return topsortedNodes.reduce( ( observables, node ) => {
     const sources = node.sources.map( preID => observables[ preID ] );
-    observables[ node.id ] = insertOperator( node.operatorConfig, sources );
+    observables[ node.id ] = insertOperator( node.id, node.operatorConfig, sources );
     return observables;
   }, {} );
 }
@@ -107,7 +109,7 @@ function connectOperators( topsortedNodes, insertOperator ) {
  *
  * @param  {graphlib.Graph}           graph
  * @param  {insertOperatorCallback}   insertOperator
- * @return {Object.<string, Rx.Observable>}
+ * @return {Object.<string, Observable>}
  */
 function run ( graph, insertOperator ) {
   return connectOperators( getTopsortedNodes( graph ), insertOperator );
@@ -126,7 +128,7 @@ function run ( graph, insertOperator ) {
  *
  * @param  {getLetOperatorCallback}  getOperatorContextAndArgs
  * @param  {OperatorConfig}          opConfig
- * @param  {Rx.Observable[0]}        sources
+ * @param  {Rx.Observable[] }        sources
  * @return {Rx.Observable}
  */
 function insertUsingLet ( getOperatorContextAndArgs, opConfig, sources ) {
