@@ -1,0 +1,12 @@
+  extends: "airbnb-base"
+  env:
+    node: true
+  rules:
+    array-bracket-spacing: ["off"]
+    curly: "off"
+    comma-dangle: ["error", "only-multiline"]
+    computed-property-spacing: ["off"]
+    no-console: "warn"
+    no-underscore-dangle: "off"
+    no-param-reassign: "off"
+    space-in-parens: ["error", "always"]

@@ -51,7 +51,7 @@ import graphlib from 'graphlib';
 
 // TODO: parseInt? NaN to MAX_VALUE?
 // TODO: accept Object with 'index' property
-const getEdgeIndex = edge => (typeof( edge ) === 'number') ? edge : Number.MAX_VALUE;
+const getEdgeIndex = edge => ( ( typeof( edge ) === 'number' ) ? edge : Number.MAX_VALUE );
 
 /**
  * Returns the nodes as a topsorted array of `NodeInfo`'s. Source nodes are sorted
@@ -67,10 +67,10 @@ function getTopsortedNodes( graph ) {
     const operatorConfig = graph.node( id );
     const inEdges = graph.inEdges( id );
 
-    const sources = inEdges.map( inEdge => ({
-        index: getEdgeIndex( graph.edge( inEdge ) ),
-        id: inEdge.v
-      }) )
+    const sources = inEdges.map( inEdge => ( {
+      index: getEdgeIndex( graph.edge( inEdge ) ),
+      id: inEdge.v
+    } ) )
       .sort( ( preA, preB ) => preA.index - preB.index )
       .map( pre => pre.id );
 
@@ -111,7 +111,7 @@ function connectOperators( topsortedNodes, insertOperator ) {
  * @param  {insertOperatorCallback}   insertOperator
  * @return {Object.<string, Observable>}
  */
-function run ( graph, insertOperator ) {
+function run( graph, insertOperator ) {
   return connectOperators( getTopsortedNodes( graph ), insertOperator );
 }
 
@@ -131,16 +131,17 @@ function run ( graph, insertOperator ) {
  * @param  {Rx.Observable[] }        sources
  * @return {Rx.Observable}
  */
-function insertUsingLet ( getOperatorContextAndArgs, opConfig, sources ) {
-  if( sources.length === 0 ) {
+function insertUsingLet( getOperatorContextAndArgs, opConfig, sources ) {
+  if ( sources.length === 0 ) {
     const opAndArgs = getOperatorContextAndArgs( opConfig, [] );
     return opAndArgs.operator.call( opAndArgs.context || null, null, ...opAndArgs.args );
-  } else {
-    const source = sources[0];
-    const extraSources = sources.slice( 1 );
-    const opAndArgs = getOperatorContextAndArgs( opConfig, extraSources );
-    return source.let( o => opAndArgs.operator.call( opAndArgs.context || null, o, ...opAndArgs.args ) );
   }
+
+  const source = sources[0];
+  const extraSources = sources.slice( 1 );
+  const opAndArgs = getOperatorContextAndArgs( opConfig, extraSources );
+  return source.let( o => opAndArgs.operator.call( opAndArgs.context ||
+                                                   null, o, ...opAndArgs.args ) );
 }
 
 export default {
@@ -148,4 +149,4 @@ export default {
   connectOperators,
   run,
   insertUsingLet
-}
+};
