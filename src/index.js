@@ -51,7 +51,7 @@ import graphlib from 'graphlib';
 
 // TODO: parseInt? NaN to MAX_VALUE?
 // TODO: accept Object with 'index' property
-const getEdgeIndex = edge => ( ( typeof( edge ) === 'number' ) ? edge : Number.MAX_VALUE );
+const getEdgeIndex = edge => ( ( typeof ( edge ) === 'number' ) ? edge : Number.MAX_VALUE );
 
 /**
  * Returns the nodes as a topsorted array of `NodeInfo`'s. Source nodes are sorted
