@@ -1,15 +1,3 @@
-  extends: "airbnb-base"
+  extends: "eslint-config-funkmonkey"
   env:
     node: true
-  rules:
-    array-bracket-spacing: ["off"]
-    arrow-parens: ["error", "as-needed"]
-    curly: "off"
-    comma-dangle: ["error", "only-multiline"]
-    computed-property-spacing: ["off"]
-    linebreak-style: ["off"]
-    no-console: "warn"
-    no-param-reassign: "off"
-    no-plusplus: "off"
-    no-underscore-dangle: "off"
-    space-in-parens: ["error", "always"]
