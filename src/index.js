@@ -91,7 +91,7 @@ function getTopsortedNodes( graph ) {
  * @param  {insertNodeCallback}              insertNode
  * @return {Object.<string, Observable>}
  */
-function connectOperators( topsortedNodes, insertNode ) {
+function connectNodes( topsortedNodes, insertNode ) {
   return topsortedNodes.reduce( ( observables, node ) => {
     const sources = node.sources.map( preID => observables[ preID ] );
     observables[ node.id ] = insertNode( node.id, node.config, sources );
@@ -105,14 +105,14 @@ function connectOperators( topsortedNodes, insertNode ) {
  * edge's value.
  *
  * This function is merely a shortcut for:
- * `connectOperators( getTopsortedNodes( graph ), insertNode )`
+ * `connectNodes( getTopsortedNodes( graph ), insertNode )`
  *
  * @param  {graphlib.Graph}           graph
  * @param  {insertNodeCallback}       insertNode
  * @return {Object.<string, Observable>}
  */
-function run( graph, insertNode ) {
-  return connectOperators( getTopsortedNodes( graph ), insertNode );
+function instantiate( graph, insertNode ) {
+  return connectNodes( getTopsortedNodes( graph ), insertNode );
 }
 
 
@@ -146,7 +146,7 @@ function insertUsingLet( getOperatorContextAndArgs, opConfig, sources ) {
 
 export default {
   getTopsortedNodes,
-  connectOperators,
-  run,
+  connectNodes,
+  instantiate,
   insertUsingLet
 };
