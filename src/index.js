@@ -27,26 +27,6 @@
  * @return {Observable}
  */
 
-/**
- * Information for chaining an operator using `Rx.Observable.let`.
- *
- * @typedef {Object} LetObservableInfo
- * @property {Function}   operator   Function to be passed to `let`
- * @property {Object}     context    [Optional] Calling context of the operator function
- * @property {*[]}        args       Additional arguments passed to the operator function
- */
-
-/**
- * Callback signature for a function that creates information for chaining an
- * operator using `Rx.Observable.let`.
- *
- * @callback getLetOperatorCallback
- * @param {NodeConfig}        config
- * @param {Observable[]}      sources         All sources, except for first one,
- *                                            which will be used as `source.let`
- * @return {LetObservableInfo}
- */
-
 import graphlib from 'graphlib';
 
 // TODO: parseInt? NaN to MAX_VALUE?
@@ -100,7 +80,7 @@ function connectNodes( topsortedNodes, insertNode ) {
 }
 
 /**
- * Runs a graph by connecting the graph's nodes in a topsorted fashion, calling
+ * Instantiates a graph by connecting the graph's nodes in a topsorted fashion, calling
  * `insertNode` for every node. Source nodes are sorted by the ingoing
  * edge's value.
  *
@@ -115,38 +95,8 @@ function instantiate( graph, insertNode ) {
   return connectNodes( getTopsortedNodes( graph ), insertNode );
 }
 
-
-/**
- * Utility function that chains operators by using `Rx.Observable.let`.
- *
- * Takes a callback function for providing the function that will be passed to
- * `let` (`operator` property), the calling context and additional arguments
- * (`args`).
- * If no sources are provided, it will be called directly with `null` as the
- * first argument. Otherwise the first element of `sources` will be considered
- * the source for `let`, while the others are passed to `getOperatorContextAndArgs`.
- *
- * @param  {getLetOperatorCallback}  getOperatorContextAndArgs
- * @param  {NodeConfig}              opConfig
- * @param  {Rx.Observable[] }        sources
- * @return {Rx.Observable}
- */
-function insertUsingLet( getOperatorContextAndArgs, opConfig, sources ) {
-  if ( sources.length === 0 ) {
-    const opAndArgs = getOperatorContextAndArgs( opConfig, [] );
-    return opAndArgs.operator.call( opAndArgs.context || null, null, ...opAndArgs.args );
-  }
-
-  const source = sources[0];
-  const extraSources = sources.slice( 1 );
-  const opAndArgs = getOperatorContextAndArgs( opConfig, extraSources );
-  return source.let( o => opAndArgs.operator.call( opAndArgs.context ||
-                                                   null, o, ...opAndArgs.args ) );
-}
-
 export default {
   getTopsortedNodes,
   connectNodes,
-  instantiate,
-  insertUsingLet
+  instantiate
 };
