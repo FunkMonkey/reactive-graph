@@ -95,8 +95,27 @@ function instantiate( graph, insertNode ) {
   return connectNodes( getTopsortedNodes( graph ), insertNode );
 }
 
+/**
+ * Destroys a graph by calling `unsubscribe` for every node that is a subscription
+ * (e.g. has an `unsubscribe` function, but not a `subscribe` function).
+ *
+ * @param    {Object.<string, Observable>}   nodes   The graph
+ */
+function destroy( nodes ) {
+  // eslint-disable-next-line no-restricted-syntax
+  for ( const nodeName in nodes ) {
+    if ( Object.prototype.hasOwnProperty.call( nodes, nodeName ) ) {
+      const observableOrSubscription = nodes[nodeName];
+      if ( typeof observableOrSubscription.unsubscribe === 'function' &&
+           typeof observableOrSubscription.subscribe !== 'function' )
+        observableOrSubscription.unsubscribe();
+    }
+  }
+}
+
 export default {
   getTopsortedNodes,
   connectNodes,
-  instantiate
+  instantiate,
+  destroy
 };
