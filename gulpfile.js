@@ -3,7 +3,7 @@ const sourcemaps = require( 'gulp-sourcemaps' );
 const babel = require( 'gulp-babel' );
 
 function watchTask( task ) {
-  const watcher = gulp.watch( [task.SRC_GLOB], task);
+  const watcher = gulp.watch( [task.SRC_GLOB], { cwd: __dirname }, task);
   watcher.on( 'add', path => { console.log('File ' + path + ' was added, running tasks...'); });
   watcher.on( 'change', path => { console.log('File ' + path + ' was changed, running tasks...'); });
 }
