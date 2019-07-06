@@ -1,6 +1,7 @@
 const gulp = require( 'gulp' );
 const sourcemaps = require( 'gulp-sourcemaps' );
 const babel = require( 'gulp-babel' );
+const package = require( './package.json' );
 
 function watchTask( task ) {
   const watcher = gulp.watch( [task.SRC_GLOB], { cwd: __dirname }, task);
@@ -22,13 +23,13 @@ const build = () =>
       .pipe( sourcemaps.write( '.' ) )
       .pipe( gulp.dest( DEST, { cwd: __dirname } ) );
 
-build.displayName = 'build';
+build.displayName = package.name + ' build';
 build.SRC_GLOB = SRC_GLOB;
 
 // watch:build task
 const watchBuild = () => watchTask( build );
-watchBuild.displayName = 'watch:build';
+watchBuild.displayName = package.name + ' watch:build';
 
 // exports
-module.exports[build.displayName] = build;
-module.exports[watchBuild.displayName] = watchBuild;
+module.exports['build'] = build;
+module.exports['watch:build'] = watchBuild;
