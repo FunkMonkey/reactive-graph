@@ -1,3 +1,6 @@
-  extends: "eslint-config-funkmonkey/javascript"
+  extends: eslint-config-funkmonkey/typescript
   env:
     node: true
+  parser: "@typescript-eslint/parser"
+  parserOptions:
+    project: ./tsconfig.json
